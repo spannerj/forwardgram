@@ -34,7 +34,6 @@ def start(config):
     async def handler(event):
 
         chat = await event.get_chat()
-
         if chat.id == 1365813396:
             logging.info("Sending new message to Monitor Test")
             await client.send_message(test_channel_entity, event.message)
