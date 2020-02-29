@@ -17,17 +17,26 @@ def start(config):
 
     input_channels_entities = []
     output_channel_entity = None
+    jpt_output_channel_entity = None
+
     for d in client.iter_dialogs():
         if d.id in config["input_channel_ids"]:
             input_channels_entities.append(InputChannel(d.entity.id, d.entity.access_hash))
         if d.id == config["output_channel_id"]:
             output_channel_entity = InputChannel(d.entity.id, d.entity.access_hash)
+        if d.id == config["jpt_output_channel_id"]:
+            jpt_output_channel_entity = InputChannel(d.entity.id, d.entity.access_hash)
         if d.id == config["test_channel_id"]:
             test_channel_entity = InputChannel(d.entity.id, d.entity.access_hash)
 
     if output_channel_entity is None:
         logger.error(f"Could not find the channel \"{config['output_channel_id']}\" in the user's dialogs")
         sys.exit(1)
+
+    if jpt_output_channel_entity is None:
+        logger.error(f"Could not find the channel \"{config['jpt_output_channel_id']}\" in the user's dialogs")
+        sys.exit(1)
+
     logging.info(f"Listening on {len(input_channels_entities)} channels. Forwarding messages to {config['output_channel_name']}.")
 
     @client.on(events.NewMessage(chats=input_channels_entities))
@@ -37,6 +46,9 @@ def start(config):
         if chat.id == 1365813396:
             logging.info("Sending new message to Monitor Test")
             await client.send_message(test_channel_entity, event.message)
+        elif chat.id == 1282680764:
+            logging.info("Sending new message to JPT")
+            await client.send_message(jpt_output_channel_entity, event.message)
         else:
             logging.info("Sending new message to Monitor")
             await client.send_message(output_channel_entity, event.message)
